@@ -1,0 +1,73 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.io.PrintWriter" %> <!-- script문장 실행을 위함 -->
+<%@ page import="user.UserDAO" %>
+<%  request.setCharacterEncoding("UTF-8"); %> <!-- 건너오는 데이터를 모두 UTF-8 형식으로 변경 -->
+<jsp:useBean id="bbs" class="bbs.Bbs" scope="page"/> <!-- 현재(writeAction.jsp) page에서 bbs라는 이름으로 bbs.Bbs 패키지를 사용 -->
+
+<!-- form 태그안에 있는 name값을 가져옴 -->
+<jsp:setProperty  name="user" property="userID" />
+<jsp:setProperty  name="user" property="userPassword"/>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta  http-equiv = "Content-Type" content="text/html; charset=UTF-8">
+<title>게시판</title>
+</head>
+<body>
+	 <% 
+	 	String userID = null;
+	 	
+	 	// session.getAttribute()로 부여받은 세션값이 null이 아니라면 부여받은 값을 변수에 저장
+	 	if (session.getAttribute("userID") != null ) {
+	 		userID = (String) session.getAttribute("userID");
+	 		
+	 	}
+	 	
+	 	if (userID != null) {
+	 		PrintWriter script = response.getWriter();
+	 		script.println("<script>");
+	 		script.println("alert('이미 로그인이 되어있습니다.')");
+	 		script.println("location.href='main.jsp'");
+	 		script.println("</script>");
+	 		
+	 	}
+	 	
+	 	// 입력되지 않은 곳 체크
+	 	if(user.getUserID() == null || user.getUserPassword() == null || user.getUserName() == null || user.getUserGender() == null || user.getUserEmail() == null) {
+	 		PrintWriter script = response.getWriter();
+	 		script.println("<script>");
+	 		script.println("alert('입력이 안 된 사항이 있습니다.')");
+	 		script.println("history.back()");
+	 		script.println("</script>");
+	 		
+	 	} else {
+	 		UserDAO userDAO = new UserDAO(); //userDAO 패키지 사용을 위해 인스턴스 생성
+		 	// userDAO 안에 user의 전체 정보를 넘겨줌
+	 	 	int result = userDAO.join(user);
+		 	
+		 	// result로 가져온 값에 따라 실행
+		 	if (result == -1) {
+		 		PrintWriter script = response.getWriter();
+		 		script.println("<script>");
+		 		script.println("alert('존재하는 아이디입니다.')");
+		 		script.println("history.back()");
+		 		script.println("</script>");
+		 		
+		 	} else {
+		 		// 회원가입에 성공한 회원에게 세션값을 부여해줌 "userID"라는 이름으로 해당 유저의 아이디를 세션 값으로 넣어줌 
+		 		session.setAttribute("userID", user.getUserID());
+		 		session.setAttribute("userName", user.getUserName());
+		 		
+		 		PrintWriter script = response.getWriter();
+		 		script.println("<script>");
+		 		script.println("location.href='main.jsp'");
+		 		script.println("</script>");
+		 		
+		 	}
+	 		
+	 	}
+	 %>
+</body>
+</html>
